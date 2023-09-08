@@ -1,5 +1,7 @@
 import pyglet
-import pyglet.media as media
+
+pyglet.options['audio'] = ('openal', 'pulse', 'silent')
+
 from gamestate import GameState
 from initial import InitialScreen
 from register import RegisterScreen
@@ -12,10 +14,6 @@ initial_screen = InitialScreen(window)
 register_screen = RegisterScreen()
 
 initial_screen.player.play()
-
-def update_state():
-    global current_state
-    current_state = GameState.REGISTER
 
 @window.event
 def on_draw():
@@ -33,14 +31,14 @@ def on_key_press(key, modifiers):
         initial_screen.player.play()
     elif key == pyglet.window.key.ENTER:
         update_state()
+    elif key == pyglet.window.key.PLUS:
+        initial_screen.increase_volume()
+    elif key == pyglet.window.key.MINUS:
+        initial_screen.decrease_volume()
 
-@window.event
-def on_mouse_press(x, y, button, modifiers):
-    initial_screen.on_mouse_press(x, y, button, modifiers)
-
-@window.event
-def on_mouse_release(x, y, button, modifiers):
-    initial_screen.on_mouse_release(x, y, button, modifiers)
+def update_state():
+    global current_state
+    current_state = GameState.REGISTER
 
 if __name__ == '__main__':
     pyglet.app.run()

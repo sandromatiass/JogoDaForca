@@ -1,65 +1,46 @@
-import pyglet;
+import pyglet
+import pyglet.media as media
+from gamestate import GameState
+from initial import InitialScreen
+from register import RegisterScreen
 
-import pyglet.media as media;
+current_state = GameState.INITIAL
 
+window = pyglet.window.Window(1150, 620, caption="Jogo da Forca - MasterGames m3_Power")
 
-gif_path = 'assets/gif/startGame.gif';
-background_animation = pyglet.resource.animation(gif_path);
+initial_screen = InitialScreen(window)
+register_screen = RegisterScreen()
 
-window = pyglet.window.Window(
-    width=background_animation.get_max_width(), 
-    height=background_animation.get_max_height(), 
-    caption="Jogo da Forca - MasterGames m3_Power");
+initial_screen.player.play()
 
-background_sprite = pyglet.sprite.Sprite(img=background_animation);
-
-## Trilha inicial
-
-audio_path = 'assets/sounds/music_track/initial.mp3';
-initial_audio = media.load(audio_path, streaming=False);
-player = pyglet.media.Player();
-player.queue(initial_audio);
-
-def on_player_eos():
-    player.seek(0);
-
-player.on_eos = on_player_eos;
-
-player.play();
-
-#Botão iniciar do jogo
-
-button_img = pyglet.image.load('assets/components/buttons/button_iniciar.png');
-button_sprite = pyglet.sprite.Sprite(button_img, x=150, y=100);
-
-button_y = 150
-button_sprite.x = 450
-button_sprite.y = button_y
-
-button_pressed = False;
-initial_scale_button = 1;
-
-@window.event
-def on_mouse_press(x, y, button, modifiers):
-    global button_pressed
-    if button_sprite.x <= x <= button_sprite.x + button_sprite.width and button_y <= y <= button_y + button_sprite.height:
-        button_pressed = True
-        button_sprite.scale = initial_scale_button * 0.9
-
-@window.event
-def on_mouse_release(x, y, button, modifiers):
-    global button_pressed
-    if button_pressed and button_sprite.x <= x <= button_sprite.x + button_sprite.width and button_y <= y <= button_y + button_sprite.height:
-        event_click(x, y)
-    button_pressed = False
-    button_sprite.scale = initial_scale_button  # Restaura o tamanho original)
-
-def event_click(x, y):
-    print("O botão foi clicado nas coordenadas (x={}, y={})".format(x, y))
+def update_state():
+    global current_state
+    current_state = GameState.REGISTER
 
 @window.event
 def on_draw():
     window.clear()
-    background_sprite.draw()
-    button_sprite.draw()
-pyglet.app.run()
+    if current_state == GameState.INITIAL:
+        initial_screen.draw()
+    elif current_state == GameState.REGISTER:
+        register_screen.draw()
+
+@window.event
+def on_key_press(key, modifiers):
+    global current_state
+    if key == pyglet.window.key.I:
+        current_state = GameState.INITIAL
+        initial_screen.player.play()
+    elif key == pyglet.window.key.ENTER:
+        update_state()
+
+@window.event
+def on_mouse_press(x, y, button, modifiers):
+    initial_screen.on_mouse_press(x, y, button, modifiers)
+
+@window.event
+def on_mouse_release(x, y, button, modifiers):
+    initial_screen.on_mouse_release(x, y, button, modifiers)
+
+if __name__ == '__main__':
+    pyglet.app.run()
